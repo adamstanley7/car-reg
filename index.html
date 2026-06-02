@@ -3,89 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FleetLog | Car Registry</title>
-    <style>
-        body { font-family: sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .container { width: 100%; max-width: 480px; }
-        header { text-align: center; margin-bottom: 20px; }
-        .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 24px; text-align: center; }
-        input { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; text-align: center; box-sizing: border-box; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; background: #2563eb; color: white; }
-        #status { font-size: 0.9rem; margin-top: 10px; min-height: 1.2em; }
-        .log-section { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; }
-        table { width: 100%; border-collapse: collapse; }
-        th { text-align: left; padding: 12px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
-        .reg-badge { background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 6px; font-weight: bold; }
-    </style>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="logo.png">
+    <title>Bonnington Leisure Centre | Car Registry</title>
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="container">
-    <header><h1>FleetLog</h1></header>
-
-    <div class="card">
-        <input type="text" id="carReg" placeholder="ENTER REG">
-        <button id="submitBtn" onclick="sendData()">Log Registration</button>
-        <p id="status"></p>
+    <div class="navbar">
+        <img src="logo.png" alt="Bonnington Hotel Logo" class="brand-logo">
+        <p class="navbar-subtitle">LEISURE CENTRE REGISTRY</p>
     </div>
 
-    <div class="log-section">
-        <table id="logTable">
-            <thead><tr><th>Registration</th><th>Time</th></tr></thead>
-            <tbody id="logTableBody"></tbody>
-        </table>
+    <div class="main-content">
+        <div class="registration-card">
+            <label for="carReg">MEMBER VEHICLE REGISTRATION</label>
+            <input type="text" id="carReg" placeholder="EG 12D3456" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false">
+            <button id="submitBtn" class="primary-btn" onclick="sendData()">SUBMIT ENTRY</button>
+            <p id="status"></p>
+        </div>
+
+        <button class="toggle-btn" id="toggleLogsBtn" onclick="toggleLogsView()">SHOW RECENT ENTRIES</button>
+
+        <div class="history-panel" id="logsPanel">
+            <div class="history-header">
+                <span>RECENT ACTIVITY LOGS</span>
+                <span class="refresh-action" onclick="fetchLogs()">REFRESH PANEL</span>
+            </div>
+            <table>
+                <tbody id="logBody"></tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<script>
-    // MAKE SURE YOUR URL IS INSIDE THE QUOTES
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6uZlCfhgSGGCGfZeQAwhZdTLZmnfi19ljMknQKfpvJR3jOxSnNAJcWw-ZeUqaU1GY/exec';
-
-    async function sendData() {
-        const input = document.getElementById('carReg');
-        const status = document.getElementById('status');
-        const regValue = input.value.trim().toUpperCase();
-
-        if (!regValue) {
-            status.innerText = "❌ Enter a registration";
-            return;
-        }
-
-        status.innerText = "⏳ Sending...";
-        
-        try {
-            await fetch(SCRIPT_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: JSON.stringify({ reg: regValue })
-            });
-
-            status.innerText = "✅ Logged Successfully";
-            input.value = "";
-            setTimeout(fetchLogs, 1000);
-        } catch (e) {
-            status.innerText = "❌ Error sending data";
-        }
-    }
-
-    async function fetchLogs() {
-        const tbody = document.getElementById('logTableBody');
-        try {
-            const res = await fetch(SCRIPT_URL);
-            const data = await res.json();
-            tbody.innerHTML = "";
-            data.forEach(row => {
-                const date = new Date(row[1]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                tbody.innerHTML += `<tr><td><span class="reg-badge">${row[0]}</span></td><td>${date}</td></tr>`;
-            });
-        } catch (e) {
-            tbody.innerHTML = "<tr><td colspan='2'>Load entries below</td></tr>";
-        }
-    }
-
-    fetchLogs();
-</script>
-
+    <script src="script.js"></script>
 </body>
 </html>
