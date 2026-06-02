@@ -1,66 +1,55 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Reg Logger</title>
+    <title>Car Registration Logger</title>
     <style>
-        :root { --primary: #2563eb; --bg: #f8fafc; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
-        h2 { margin-bottom: 1.5rem; color: #1e293b; }
-        input { width: 100%; padding: 12px; margin-bottom: 1rem; border: 2px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; font-size: 1.1rem; text-transform: uppercase; font-weight: bold; text-align: center; }
-        input:focus { border-color: var(--primary); outline: none; }
-        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: opacity 0.2s; }
-        button:disabled { opacity: 0.5; cursor: not-allowed; }
-        #status { margin-top: 1rem; font-size: 0.9rem; color: #64748b; min-height: 1.2em; }
+        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 30px; border-radius: 15px; shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 18px; text-transform: uppercase; text-align: center; }
+        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
+        button:active { background: #218838; }
+        #status { margin-top: 15px; font-size: 14px; color: #666; }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2>Car Reg Tracker</h2>
-    <input type="text" id="regInput" placeholder="ENTER REG" autocomplete="off">
-    <button id="submitBtn" onclick="submitData()">Submit Entry</button>
+<div class="box">
+    <h2>Log Car Reg</h2>
+    <input type="text" id="carReg" placeholder="ENTER REG" autocomplete="off">
+    <button onclick="sendData()">Submit to Sheet</button>
     <p id="status"></p>
 </div>
 
 <script>
-    async function submitData() {
-        const input = document.getElementById('regInput');
-        const btn = document.getElementById('submitBtn');
+    async function sendData() {
+        const regInput = document.getElementById('carReg');
         const status = document.getElementById('status');
         
-        // --- CONFIGURATION ---
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-DGQv7YJR2f44_zsgEeoPguZXt764vP0Iglo_1v45F8I0BKrEhMcyiN3Rq6M0-zm4/exec'; 
-        // ---------------------
+        // PASTE YOUR URL BETWEEN THE QUOTES BELOW
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6uZlCfhgSGGCGfZeQAwhZdTLZmnfi19ljMknQKfpvJR3jOxSnNAJcWw-ZeUqaU1GY/exec';
 
-        if (!input.value.trim()) {
-            status.innerText = "❌ Please enter a registration";
+        if (!regInput.value) {
+            status.innerText = "Please enter a registration!";
             return;
         }
 
-        status.innerText = "⏳ Syncing with Google Sheets...";
-        btn.disabled = true;
+        status.innerText = "Sending to Google Sheets...";
 
         try {
             await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Bypasses CORS issues
-                cache: 'no-cache',
+                mode: 'no-cors', // This prevents the 'Error' message on the website
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ "reg": input.value.toUpperCase() })
+                body: JSON.stringify({ reg: regInput.value.toUpperCase() })
             });
 
-            // Because of 'no-cors', we won't get a standard response object
-            // If the fetch doesn't throw an error, it was sent successfully
-            status.innerText = "✅ Logged Successfully!";
-            input.value = '';
+            status.innerText = "✅ Logged successfully!";
+            regInput.value = ""; // Clear the box
         } catch (error) {
-            status.innerText = "❌ Error: Could not connect.";
+            status.innerText = "❌ Connection Error";
             console.error(error);
-        } finally {
-            btn.disabled = false;
         }
     }
 </script>
