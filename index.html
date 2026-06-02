@@ -5,171 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>FleetLog | Car Registry</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --success: #22c55e;
-            --error: #ef4444;
-            --bg: #f1f5f9;
-            --text-main: #1e293b;
-        }
-
-        body { 
-            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
-            background-color: var(--bg); 
-            color: var(--text-main);
-            margin: 0; padding: 20px;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
+        body { font-family: sans-serif; background-color: #f1f5f9; color: #1e293b; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { width: 100%; max-width: 480px; }
-
-        header { text-align: center; margin-bottom: 2rem; }
-        header h1 { margin: 0; color: var(--primary); font-size: 1.8rem; }
-        header p { margin: 5px 0 0; color: #64748b; font-size: 0.9rem; }
-
-        .card { 
-            background: white; padding: 24px; border-radius: 16px; 
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); margin-bottom: 24px;
-        }
-
-        .input-group { position: relative; margin-bottom: 1rem; }
-        input { 
-            width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px;
-            font-size: 1.2rem; font-weight: 700; text-transform: uppercase;
-            text-align: center; box-sizing: border-box; transition: all 0.2s;
-        }
-        input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
-
-        button { 
-            width: 100%; padding: 14px; border: none; border-radius: 10px;
-            font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
-        }
-        .btn-main { background: var(--primary); color: white; margin-bottom: 10px; }
-        .btn-main:hover { background: var(--primary-hover); transform: translateY(-1px); }
-        .btn-main:active { transform: translateY(0); }
-
-        #status { font-size: 0.85rem; height: 1.2rem; margin-bottom: 0; transition: color 0.3s; }
-
-        .log-section { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .log-header { padding: 16px 20px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-        .log-header h3 { margin: 0; font-size: 1rem; }
-        
-        .refresh-btn { background: none; border: 1px solid #cbd5e1; padding: 6px 12px; font-size: 0.8rem; width: auto; color: #475569; }
-        .refresh-btn:hover { background: #f1f5f9; }
-
-        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-        th { text-align: left; padding: 12px 20px; background: #f8fafc; color: #64748b; font-weight: 600; border-bottom: 1px solid #e2e8f0; }
-        td { padding: 14px 20px; border-bottom: 1px solid #f1f5f9; }
-        tr:last-child td { border: none; }
-        .reg-badge { background: #eff6ff; color: var(--primary); padding: 4px 8px; border-radius: 6px; font-weight: 700; font-family: monospace; }
-        .time-text { color: #64748b; font-size: 0.8rem; }
+        header { text-align: center; margin-bottom: 20px; }
+        .card { background: white; padding: 24px; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 24px; text-align: center; }
+        input { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1.2rem; font-weight: bold; text-transform: uppercase; text-align: center; box-sizing: border-box; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; margin-top: 10px; background: #2563eb; color: white; }
+        #status { font-size: 0.9rem; margin-top: 10px; min-height: 1.2em; }
+        .log-section { background: white; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; background: #f8fafc; border-bottom: 1px solid #e2e8f0; }
+        td { padding: 12px; border-bottom: 1px solid #f1f5f9; }
+        .reg-badge { background: #eff6ff; color: #2563eb; padding: 4px 8px; border-radius: 6px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>FleetLog</h1>
-        <p>Real-time Registration Tracker</p>
-    </header>
+    <header><h1>FleetLog</h1></header>
 
     <div class="card">
-        <div class="input-group">
-            <input type="text" id="carReg" placeholder="Enter Reg (e.g. AB12 CDE)" maxlength="12">
-        </div>
-        <button class="btn-main" id="submitBtn" onclick="sendData()">Log Registration</button>
+        <input type="text" id="carReg" placeholder="ENTER REG">
+        <button id="submitBtn" onclick="sendData()">Log Registration</button>
         <p id="status"></p>
     </div>
 
     <div class="log-section">
-        <div class="log-header">
-            <h3>Recent Activity</h3>
-            <button class="refresh-btn" onclick="fetchLogs()">↻ Refresh</button>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Registration</th>
-                    <th>Timestamp</th>
-                </tr>
-            </thead>
-            <tbody id="logTableBody">
-                <tr><td colspan="2" style="text-align:center; color:#94a3b8; padding:40px;">Loading history...</td></tr>
-            </tbody>
+        <table id="logTable">
+            <thead><tr><th>Registration</th><th>Time</th></tr></thead>
+            <tbody id="logTableBody"></tbody>
         </table>
     </div>
 </div>
 
 <script>
+    // MAKE SURE YOUR URL IS INSIDE THE QUOTES
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6uZlCfhgSGGCGfZeQAwhZdTLZmnfi19ljMknQKfpvJR3jOxSnNAJcWw-ZeUqaU1GY/exec';
 
     async function sendData() {
         const input = document.getElementById('carReg');
-        const btn = document.getElementById('submitBtn');
         const status = document.getElementById('status');
-        
-        if (!input.value.trim()) return;
+        const regValue = input.value.trim().toUpperCase();
 
-        status.innerText = "Connecting to server...";
-        status.style.color = "#64748b";
-        btn.disabled = true;
-        btn.style.opacity = "0.7";
+        if (!regValue) {
+            status.innerText = "❌ Enter a registration";
+            return;
+        }
+
+        status.innerText = "⏳ Sending...";
         
         try {
-            const response = await fetch(SCRIPT_URL, {
+            await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({ reg: input.value.toUpperCase() })
+                mode: 'no-cors',
+                body: JSON.stringify({ reg: regValue })
             });
-            const result = await response.text();
 
-            if (result === "Duplicate") {
-                status.innerText = "⚠ Already registered in the last 24h";
-                status.style.color = var(--error);
-            } else {
-                status.innerText = "✔ Successfully logged";
-                status.style.color = var(--success);
-                input.value = "";
-                setTimeout(fetchLogs, 500); 
-            }
+            status.innerText = "✅ Logged Successfully";
+            input.value = "";
+            setTimeout(fetchLogs, 1000);
         } catch (e) {
-            status.innerText = "✔ Request sent";
-            setTimeout(fetchLogs, 1500);
-        } finally {
-            btn.disabled = false;
-            btn.style.opacity = "1";
+            status.innerText = "❌ Error sending data";
         }
     }
 
     async function fetchLogs() {
-        const tableBody = document.getElementById('logTableBody');
+        const tbody = document.getElementById('logTableBody');
         try {
-            const response = await fetch(SCRIPT_URL);
-            const data = await response.json();
-            
-            tableBody.innerHTML = "";
-            if (data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:20px;">No logs found</td></tr>';
-                return;
-            }
-
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            tbody.innerHTML = "";
             data.forEach(row => {
-                const tr = document.createElement('tr');
-                const date = new Date(row[1]).toLocaleString([], { 
-                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' 
-                });
-                tr.innerHTML = `
-                    <td><span class="reg-badge">${row[0]}</span></td>
-                    <td class="time-text">${date}</td>
-                `;
-                tableBody.appendChild(tr);
+                const date = new Date(row[1]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                tbody.innerHTML += `<tr><td><span class="reg-badge">${row[0]}</span></td><td>${date}</td></tr>`;
             });
         } catch (e) {
-            tableBody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:20px; color:red;">Failed to load logs.</td></tr>';
+            tbody.innerHTML = "<tr><td colspan='2'>Load entries below</td></tr>";
         }
     }
 
-    // Initial Load
     fetchLogs();
 </script>
 
