@@ -1,43 +1,66 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Car Reg Tracker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Car Reg Logger</title>
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; }
-        .container { border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
-        input { padding: 10px; width: 200px; text-transform: uppercase; }
-        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; }
+        :root { --primary: #2563eb; --bg: #f8fafc; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        h2 { margin-bottom: 1.5rem; color: #1e293b; }
+        input { width: 100%; padding: 12px; margin-bottom: 1rem; border: 2px solid #e2e8f0; border-radius: 6px; box-sizing: border-box; font-size: 1.1rem; text-transform: uppercase; font-weight: bold; text-align: center; }
+        input:focus { border-color: var(--primary); outline: none; }
+        button { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; transition: opacity 0.2s; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        #status { margin-top: 1rem; font-size: 0.9rem; color: #64748b; min-height: 1.2em; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Log Car Registration</h2>
-    <input type="text" id="regInput" placeholder="Enter Registration...">
-    <button onclick="submitData()">Submit</button>
+<div class="card">
+    <h2>Car Reg Tracker</h2>
+    <input type="text" id="regInput" placeholder="ENTER REG" autocomplete="off">
+    <button id="submitBtn" onclick="submitData()">Submit Entry</button>
     <p id="status"></p>
 </div>
 
 <script>
     async function submitData() {
-        const reg = document.getElementById('regInput').value;
+        const input = document.getElementById('regInput');
+        const btn = document.getElementById('submitBtn');
         const status = document.getElementById('status');
-        const scriptURL = 'https://script.google.com/a/macros/mail.dcu.ie/s/AKfycby0MGpU6vcKhXcoN4xmuy-vQH7A_CZnfayikq23PhyPa8rt12u9eETZhAn8sJfyEgR9/exec';
+        
+        // --- CONFIGURATION ---
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby-DGQv7YJR2f44_zsgEeoPguZXt764vP0Iglo_1v45F8I0BKrEhMcyiN3Rq6M0-zm4/exec'; 
+        // ---------------------
 
-        if(!reg) return alert("Please enter a reg!");
+        if (!input.value.trim()) {
+            status.innerText = "❌ Please enter a registration";
+            return;
+        }
 
-        status.innerText = "Sending...";
+        status.innerText = "⏳ Syncing with Google Sheets...";
+        btn.disabled = true;
 
         try {
-            await fetch(scriptURL, {
+            await fetch(SCRIPT_URL, {
                 method: 'POST',
-                body: JSON.stringify({ "reg": reg })
+                mode: 'no-cors', // Bypasses CORS issues
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ "reg": input.value.toUpperCase() })
             });
-            status.innerText = "Success! Logged to Sheet.";
-            document.getElementById('regInput').value = '';
+
+            // Because of 'no-cors', we won't get a standard response object
+            // If the fetch doesn't throw an error, it was sent successfully
+            status.innerText = "✅ Logged Successfully!";
+            input.value = '';
         } catch (error) {
-            status.innerText = "Error saving data.";
-            console.error('Error!', error.message);
+            status.innerText = "❌ Error: Could not connect.";
+            console.error(error);
+        } finally {
+            btn.disabled = false;
         }
     }
 </script>
