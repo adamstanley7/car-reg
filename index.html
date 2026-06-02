@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Car Reg Tracker</title>
+    <style>
+        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 50px; }
+        .container { border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
+        input { padding: 10px; width: 200px; text-transform: uppercase; }
+        button { padding: 10px 20px; cursor: pointer; background: #007bff; color: white; border: none; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Log Car Registration</h2>
+    <input type="text" id="regInput" placeholder="Enter Registration...">
+    <button onclick="submitData()">Submit</button>
+    <p id="status"></p>
+</div>
+
+<script>
+    async function submitData() {
+        const reg = document.getElementById('regInput').value;
+        const status = document.getElementById('status');
+        const scriptURL = 'https://script.google.com/a/macros/mail.dcu.ie/s/AKfycby0MGpU6vcKhXcoN4xmuy-vQH7A_CZnfayikq23PhyPa8rt12u9eETZhAn8sJfyEgR9/exec';
+
+        if(!reg) return alert("Please enter a reg!");
+
+        status.innerText = "Sending...";
+
+        try {
+            await fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify({ "reg": reg })
+            });
+            status.innerText = "Success! Logged to Sheet.";
+            document.getElementById('regInput').value = '';
+        } catch (error) {
+            status.innerText = "Error saving data.";
+            console.error('Error!', error.message);
+        }
+    }
+</script>
+
+</body>
+</html>
