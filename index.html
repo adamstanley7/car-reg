@@ -1,57 +1,108 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Car Registration Logger</title>
+    <title>Car Registry System</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .box { background: white; padding: 30px; border-radius: 15px; shadow: 0 4px 10px rgba(0,0,0,0.1); text-align: center; width: 300px; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 18px; text-transform: uppercase; text-align: center; }
-        button { width: 100%; padding: 12px; background: #28a745; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; }
-        button:active { background: #218838; }
-        #status { margin-top: 15px; font-size: 14px; color: #666; }
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; margin-bottom: 20px; }
+        input { width: 80%; padding: 12px; margin: 10px 0; border: 2px solid #ddd; border-radius: 8px; text-transform: uppercase; font-size: 1.2rem; text-align: center; }
+        button { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        .btn-submit { background: #28a745; color: white; width: 85%; }
+        .btn-refresh { background: #007bff; color: white; margin-top: 10px; }
+        #status { margin-top: 15px; font-size: 0.9rem; font-weight: bold; }
+        
+        /* Table Styles */
+        .table-container { width: 100%; max-width: 500px; background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: #333; color: white; padding: 12px; }
+        td { padding: 10px; border-bottom: 1px solid #eee; text-align: center; }
+        tr:nth-child(even) { background: #fafafa; }
     </style>
 </head>
 <body>
 
-<div class="box">
-    <h2>Log Car Reg</h2>
-    <input type="text" id="carReg" placeholder="ENTER REG" autocomplete="off">
-    <button onclick="sendData()">Submit to Sheet</button>
+<div class="card">
+    <h2>🚗 Register Car</h2>
+    <input type="text" id="carReg" placeholder="ABC 123">
+    <button class="btn-submit" onclick="sendData()">Submit Entry</button>
     <p id="status"></p>
 </div>
 
+<div class="table-container">
+    <div style="padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin:0">Recent Logs</h3>
+        <button class="btn-refresh" onclick="fetchLogs()">Refresh List</button>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Registration</th>
+                <th>Date/Time</th>
+            </tr>
+        </thead>
+        <tbody id="logTableBody">
+            </tbody>
+    </table>
+</div>
+
 <script>
+    const SCRIPT_URL = 'YOUR_APPS_SCRIPT_URL_HERE';
+
     async function sendData() {
-        const regInput = document.getElementById('carReg');
+        const input = document.getElementById('carReg');
         const status = document.getElementById('status');
+        if (!input.value) return alert("Enter a reg!");
+
+        status.innerText = "Processing...";
         
-        // PASTE YOUR URL BETWEEN THE QUOTES BELOW
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx6uZlCfhgSGGCGfZeQAwhZdTLZmnfi19ljMknQKfpvJR3jOxSnNAJcWw-ZeUqaU1GY/exec';
-
-        if (!regInput.value) {
-            status.innerText = "Please enter a registration!";
-            return;
-        }
-
-        status.innerText = "Sending to Google Sheets...";
-
         try {
-            await fetch(SCRIPT_URL, {
+            // We use a normal fetch here to see the response (Success or Duplicate)
+            const response = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // This prevents the 'Error' message on the website
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ reg: regInput.value.toUpperCase() })
+                body: JSON.stringify({ reg: input.value.toUpperCase() })
             });
+            const result = await response.text();
 
-            status.innerText = "✅ Logged successfully!";
-            regInput.value = ""; // Clear the box
-        } catch (error) {
-            status.innerText = "❌ Connection Error";
-            console.error(error);
+            if (result === "Duplicate") {
+                status.style.color = "red";
+                status.innerText = "❌ Already logged today!";
+            } else {
+                status.style.color = "green";
+                status.innerText = "✅ Success!";
+                input.value = "";
+                fetchLogs(); // Automatically refresh list
+            }
+        } catch (e) {
+            // Fallback for CORS
+            status.innerText = "Sent! (Refresh to verify)";
+            fetchLogs();
         }
     }
+
+    async function fetchLogs() {
+        const tableBody = document.getElementById('logTableBody');
+        tableBody.innerHTML = '<tr><td colspan="2">Loading...</td></tr>';
+        
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+            
+            tableBody.innerHTML = "";
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                const date = new Date(row[1]).toLocaleString();
+                tr.innerHTML = `<td><strong>${row[0]}</strong></td><td>${date}</td>`;
+                tableBody.appendChild(tr);
+            });
+        } catch (e) {
+            tableBody.innerHTML = '<tr><td colspan="2">Could not load logs.</td></tr>';
+        }
+    }
+
+    // Load logs on page open
+    fetchLogs();
 </script>
 
 </body>
